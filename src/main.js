@@ -43,6 +43,15 @@ function analyzeSalesData(data, options) {
   if (!data || !Array.isArray(data.sellers) || data.sellers.length === 0) {
     throw new Error("Некорректные входные данные");
   }
+  if (!Array.isArray(data.products) || data.products.length === 0) {
+    throw new Error("Некорректные входные данные");
+  }
+  if (
+    !Array.isArray(data.purchase_records) ||
+    data.purchase_records.length === 0
+  ) {
+    throw new Error("Некорректные входные данные");
+  }
   // @TODO: Проверка наличия опций
   const { calculateRevenue, calculateBonus } = options;
   if (
@@ -80,7 +89,7 @@ function analyzeSalesData(data, options) {
       const product = productIndex[item.sku];
       if (!product) return;
 
-      const revenueItem = calculateSimpleRevenue(item, product);
+      const revenueItem = calculateRevenue(item, product);
       const costItem = product.purchase_price * item.quantity;
       const profitItem = revenueItem - costItem;
       seller.profit += profitItem;
@@ -94,7 +103,7 @@ function analyzeSalesData(data, options) {
   const totalSellers = sellerStats.length;
   // @TODO: Назначение премий на основе ранжирования
   sellerStats.forEach((seller, index) => {
-    seller.bonus = calculateBonusByProfit(index, totalSellers, seller);
+    seller.bonus = calculateBonus(index, totalSellers, seller);
 
     const productsArray = Object.entries(seller.products_sold)
       .map(([sku, quantity]) => ({ sku, quantity }))
